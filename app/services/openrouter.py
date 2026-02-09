@@ -21,11 +21,27 @@ OPENROUTER_BASE = "https://openrouter.ai/api/v1"
 
 # Approximate cost per 1M tokens (update as pricing changes)
 MODEL_COSTS = {
+    # Premium models
     "qwen/qwen2.5-vl-72b-instruct": {"input": 0.15, "output": 0.15},
-    "openai/gpt-4o-mini": {"input": 0.15, "output": 0.60},
     "openai/gpt-4o": {"input": 2.50, "output": 10.00},
+    "openai/gpt-4o-mini": {"input": 0.15, "output": 0.60},
+    # Mid-tier models
     "qwen/qwen2.5-vl-32b-instruct": {"input": 0.50, "output": 0.50},
+    "qwen/qwen3-vl-8b-instruct": {"input": 0.05, "output": 0.15},
+    "meta-llama/llama-3.2-11b-vision-instruct": {"input": 0.055, "output": 0.055},
+    # Free models
+    "google/gemma-3-27b-it:free": {"input": 0.0, "output": 0.0},
 }
+
+# Available models for user selection
+AVAILABLE_MODELS = [
+    {"id": "qwen/qwen2.5-vl-72b-instruct", "name": "Qwen2.5-VL 72B", "tier": "premium"},
+    {"id": "openai/gpt-4o", "name": "GPT-4o", "tier": "premium"},
+    {"id": "openai/gpt-4o-mini", "name": "GPT-4o Mini", "tier": "standard"},
+    {"id": "qwen/qwen3-vl-8b-instruct", "name": "Qwen3-VL 8B", "tier": "standard"},
+    {"id": "meta-llama/llama-3.2-11b-vision-instruct", "name": "Llama 3.2 11B Vision", "tier": "standard"},
+    {"id": "google/gemma-3-27b-it:free", "name": "Gemma 3 27B (Free)", "tier": "free"},
+]
 
 
 class BudgetExceededError(Exception):

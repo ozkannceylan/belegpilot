@@ -49,6 +49,24 @@
             outline: none;
             border-color: #60a5fa;
         }
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            background: #0f172a;
+            color: #e2e8f0;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        select:focus {
+            outline: none;
+            border-color: #60a5fa;
+        }
+        select option {
+            background: #1e293b;
+            color: #e2e8f0;
+        }
         /* Server selector */
         .server-toggle {
             display: flex;
@@ -239,7 +257,11 @@
 
     <!-- Options -->
     <section id="options">
-        <label><input type="checkbox" id="forceOcr" /> Force OCR (skip VLM)</label>
+        <label for="modelSelect">Model</label>
+        <select id="modelSelect">
+            <option value="">Auto (server default)</option>
+        </select>
+        <label style="margin-top: 1rem;"><input type="checkbox" id="forceOcr" /> Force OCR (skip VLM)</label>
     </section>
 
     <!-- Submit -->
@@ -280,6 +302,7 @@
         const localBtn = document.getElementById('localBtn');
         const serverUrl = document.getElementById('serverUrl');
         const apiKeyInput = document.getElementById('apiKey');
+        const modelSelect = document.getElementById('modelSelect');
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
         const preview = document.getElementById('preview');
@@ -291,6 +314,33 @@
         const errorDiv = document.getElementById('error');
 
         let selectedFile = null;
+
+        // Fetch available models
+        async function loadModels() {
+            try {
+                const response = await fetch(`${API_BASE}/models`);
+                if (response.ok) {
+                    const data = await response.json();
+                    modelSelect.innerHTML = '<option value="">Auto (server default)</option>';
+                    data.models.forEach(model => {
+                        const opt = document.createElement('option');
+                        opt.value = model.id;
+                        opt.textContent = `${model.name} (${model.tier})`;
+                        modelSelect.appendChild(opt);
+                    });
+                    // Restore saved selection
+                    const saved = localStorage.getItem(`BelegPilot_model_${currentServer}`);
+                    if (saved) modelSelect.value = saved;
+                }
+            } catch (e) {
+                console.log('Could not load models:', e);
+            }
+        }
+
+        // Save model selection
+        modelSelect.addEventListener('change', () => {
+            localStorage.setItem(`BelegPilot_model_${currentServer}`, modelSelect.value);
+        });
 
         // Server toggle functionality
         function setServer(server) {
@@ -304,6 +354,10 @@
             
             // Load saved API key for this server
             apiKeyInput.value = localStorage.getItem(`BelegPilot_api_key_${server}`) || '';
+            
+            // Load models for this server
+            loadModels();
+            
             updateSubmitState();
         }
         
@@ -373,7 +427,11 @@
             formData.append('file', selectedFile);
 
             const forceOcr = document.getElementById('forceOcr').checked;
-            const url = `${API_BASE}/api/v1/extract?force_ocr=${forceOcr}`;
+            const selectedModel = modelSelect.value;
+            let url = `${API_BASE}/api/v1/extract?force_ocr=${forceOcr}`;
+            if (selectedModel) {
+                url += `&model_override=${encodeURIComponent(selectedModel)}`;
+            }
 
             try {
                 const response = await fetch(url, {
