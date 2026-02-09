@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Environment
+.env
+.env.production
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Docker volumes
+pgdata/
+phoenix_data/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test / Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+*.db
+
+# Uploads
+uploads/
+*.jpg
+*.jpeg
+*.png
+!tests/fixtures/**
+
+# Documentation (keep README.md only)
+PHASE_*.md
+CLAUDE.md
+REVIEW_LOG.md
+
+# Duplicate workspace folder
+CUsersozkanprojectsreceip-iq/

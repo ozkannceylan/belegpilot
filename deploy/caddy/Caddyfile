@@ -1,0 +1,18 @@
+api.ozvatanyapi.com {
+    reverse_proxy app:8000
+
+    # Security headers
+    header {
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    # Rate limiting (basic)
+    # For production: use Caddy rate limit plugin
+
+    log {
+        output file /var/log/caddy/belegpilot.log
+        format json
+    }
+}

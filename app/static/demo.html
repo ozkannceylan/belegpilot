@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BelegPilot - Receipt Extraction Demo</title>
+    <style>
+        /* Clean, minimal CSS - dark theme */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: #0f172a; color: #e2e8f0;
+            max-width: 800px; margin: 0 auto; padding: 2rem 1rem;
+            line-height: 1.6;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        section {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #94a3b8;
+        }
+        input[type="password"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            background: #0f172a;
+            color: #e2e8f0;
+            font-size: 1rem;
+        }
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #60a5fa;
+        }
+        #dropZone {
+            border: 2px dashed #334155;
+            border-radius: 12px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        #dropZone:hover, #dropZone.dragover {
+            border-color: #60a5fa;
+            background: rgba(96, 165, 250, 0.1);
+        }
+        #dropZone p {
+            color: #94a3b8;
+            margin-bottom: 0.5rem;
+        }
+        #dropZone .hint {
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+        #preview {
+            position: relative;
+            display: inline-block;
+        }
+        #previewImg {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 8px;
+        }
+        #clearBtn {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+        #clearBtn:hover {
+            background: #dc2626;
+        }
+        #options label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+        #options input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #60a5fa;
+        }
+        #submitBtn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        #submitBtn:hover:not(:disabled) {
+            opacity: 0.9;
+        }
+        #submitBtn:disabled {
+            background: #334155;
+            cursor: not-allowed;
+        }
+        #loading {
+            text-align: center;
+            padding: 2rem;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #334155;
+            border-top-color: #60a5fa;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        #meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        #meta span {
+            background: #0f172a;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+        }
+        #meta #confidence {
+            background: #059669;
+        }
+        #jsonOutput {
+            background: #0f172a;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: #e2e8f0;
+        }
+        #error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>BelegPilot</h1>
+        <p>Upload a receipt or invoice to extract structured data</p>
+    </header>
+
+    <!-- API Key Input -->
+    <section id="auth">
+        <label for="apiKey">API Key</label>
+        <input type="password" id="apiKey" placeholder="riq_live_..." />
+    </section>
+
+    <!-- Upload Area -->
+    <section id="upload">
+        <div id="dropZone">
+            <p>Drop receipt image here or click to browse</p>
+            <p class="hint">Accepts: JPEG, PNG, PDF (max 10MB)</p>
+            <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.pdf" hidden />
+        </div>
+        <div id="preview" hidden>
+            <img id="previewImg" />
+            <button id="clearBtn">Clear</button>
+        </div>
+    </section>
+
+    <!-- Options -->
+    <section id="options">
+        <label><input type="checkbox" id="forceOcr" /> Force OCR (skip VLM)</label>
+    </section>
+
+    <!-- Submit -->
+    <button id="submitBtn" disabled>Extract Data</button>
+
+    <!-- Loading -->
+    <div id="loading" hidden>
+        <div class="spinner"></div>
+        <p>Extracting... this may take 5-15 seconds</p>
+    </div>
+
+    <!-- Results -->
+    <section id="results" hidden>
+        <div id="meta">
+            <span id="confidence"></span>
+            <span id="timing"></span>
+            <span id="cost"></span>
+            <span id="method"></span>
+        </div>
+        <pre id="jsonOutput"></pre>
+    </section>
+
+    <!-- Error -->
+    <div id="error" hidden></div>
+
+    <script>
+        const API_BASE = window.location.origin;
+
+        // DOM elements
+        const apiKeyInput = document.getElementById('apiKey');
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const preview = document.getElementById('preview');
+        const previewImg = document.getElementById('previewImg');
+        const submitBtn = document.getElementById('submitBtn');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const jsonOutput = document.getElementById('jsonOutput');
+        const errorDiv = document.getElementById('error');
+
+        let selectedFile = null;
+
+        // Persist API key in localStorage
+        apiKeyInput.value = localStorage.getItem('BelegPilot_api_key') || '';
+        apiKeyInput.addEventListener('input', () => {
+            localStorage.setItem('BelegPilot_api_key', apiKeyInput.value);
+            updateSubmitState();
+        });
+
+        // Drag and drop
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length) handleFile(fileInput.files[0]);
+        });
+
+        function handleFile(file) {
+            if (file.size > 10 * 1024 * 1024) {
+                showError('File too large. Maximum 10MB.');
+                return;
+            }
+            selectedFile = file;
+            if (file.type.startsWith('image/')) {
+                previewImg.src = URL.createObjectURL(file);
+                preview.hidden = false;
+            }
+            dropZone.hidden = true;
+            updateSubmitState();
+        }
+
+        function updateSubmitState() {
+            submitBtn.disabled = !selectedFile || !apiKeyInput.value;
+        }
+
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            selectedFile = null;
+            fileInput.value = '';
+            preview.hidden = true;
+            dropZone.hidden = false;
+            results.hidden = true;
+            errorDiv.hidden = true;
+            updateSubmitState();
+        });
+
+        // Submit extraction
+        submitBtn.addEventListener('click', async () => {
+            if (!selectedFile || !apiKeyInput.value) return;
+
+            loading.hidden = false;
+            results.hidden = true;
+            errorDiv.hidden = true;
+            submitBtn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            const forceOcr = document.getElementById('forceOcr').checked;
+            const url = `${API_BASE}/api/v1/extract?force_ocr=${forceOcr}`;
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'X-API-Key': apiKeyInput.value },
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.detail || `HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                displayResults(data);
+            } catch (err) {
+                showError(err.message);
+            } finally {
+                loading.hidden = true;
+                submitBtn.disabled = false;
+            }
+        });
+
+        function displayResults(data) {
+            results.hidden = false;
+
+            // Meta info
+            document.getElementById('confidence').textContent =
+                `Confidence: ${(data.confidence_score * 100).toFixed(0)}%`;
+            document.getElementById('timing').textContent =
+                `Time: ${data.processing_time_ms}ms`;
+            document.getElementById('cost').textContent =
+                `Cost: $${data.cost_usd.toFixed(4)}`;
+            document.getElementById('method').textContent =
+                `Method: ${data.extraction_method}`;
+
+            // JSON output with syntax highlighting
+            jsonOutput.textContent = JSON.stringify(data.data, null, 2);
+        }
+
+        function showError(msg) {
+            errorDiv.textContent = msg;
+            errorDiv.hidden = false;
+        }
+    </script>
+</body>
+</html>

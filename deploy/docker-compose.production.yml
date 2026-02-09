@@ -1,0 +1,63 @@
+services:
+  app:
+    image: ghcr.io/ozkannceylan/belegpilot:latest
+    restart: always
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+      phoenix:
+        condition: service_started
+    networks:
+      - internal
+
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: belegpilot
+      POSTGRES_USER: belegpilot
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U belegpilot"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - internal
+
+  phoenix:
+    image: arizephoenix/phoenix:latest
+    restart: always
+    environment:
+      PHOENIX_WORKING_DIR: /phoenix
+    volumes:
+      - phoenix_data:/phoenix
+    networks:
+      - internal
+
+  caddy:
+    image: caddy:2-alpine
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+    networks:
+      - internal
+
+volumes:
+  pgdata:
+  phoenix_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  internal:
