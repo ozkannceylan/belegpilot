@@ -78,9 +78,9 @@ async def test_select_model_exceeded_monthly(openrouter, test_db):
 
 def test_estimate_cost_known_model(openrouter):
     """Cost estimation for known model uses correct rates."""
-    cost = openrouter.estimate_cost("qwen/qwen2-vl-72b-instruct", 1_000_000, 1_000_000)
-    # input: 0.40/1M, output: 0.40/1M → 0.80 total
-    assert abs(cost - 0.80) < 0.001
+    cost = openrouter.estimate_cost("qwen/qwen2.5-vl-72b-instruct", 1_000_000, 1_000_000)
+    # input: 0.15/1M, output: 0.15/1M → 0.30 total
+    assert abs(cost - 0.30) < 0.001
 
 
 def test_estimate_cost_unknown_model(openrouter):
