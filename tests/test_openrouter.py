@@ -99,7 +99,7 @@ async def test_record_cost(openrouter, test_db):
 
     await openrouter.record_cost(
         db=test_db,
-        model="qwen/qwen2-vl-72b-instruct",
+        model="qwen/qwen2.5-vl-72b-instruct",
         input_tokens=1000,
         output_tokens=500,
         cost_usd=0.001,

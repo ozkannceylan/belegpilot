@@ -51,12 +51,13 @@ async def test_pipeline_vlm_success(
 ):
     """Full pipeline with mocked VLM returns ExtractionResult."""
     vlm_meta = {
-        "model": "qwen/qwen2-vl-72b-instruct",
+        "model": "qwen/qwen2.5-vl-72b-instruct",
         "input_tokens": 1000,
         "output_tokens": 500,
         "cost_usd": 0.001,
         "elapsed_ms": 3000,
-        "raw_response": '{"vendor": "REWE"}',
+        "raw_response": '{
+"vendor": "REWE"}',
     }
 
     with (
@@ -184,7 +185,7 @@ async def test_pipeline_vlm_returns_none_falls_back(
 ):
     """When VLM returns None (parse failure), falls back to OCR."""
     vlm_meta = {
-        "model": "qwen/qwen2-vl-72b-instruct",
+        "model": "qwen/qwen2.5-vl-72b-instruct",
         "input_tokens": 1000,
         "output_tokens": 500,
         "cost_usd": 0.001,

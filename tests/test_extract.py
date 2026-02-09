@@ -34,7 +34,7 @@ async def test_extract_success(client, sample_receipt_bytes, mock_vlm_response):
             data=ReceiptData(**mock_vlm_response),
             confidence_score=0.92,
             extraction_method="vlm",
-            model_used="qwen/qwen2-vl-72b-instruct",
+            model_used="qwen/qwen2.5-vl-72b-instruct",
             processing_time_ms=3500,
             cost_usd=0.002,
         )
