@@ -28,7 +28,7 @@ class Settings(BaseSettings):
 
     # OpenRouter
     openrouter_api_key: str = ""
-    openrouter_default_model: str = "qwen/qwen2-vl-72b-instruct"
+    openrouter_default_model: str = "qwen/qwen2.5-vl-72b-instruct"
     openrouter_fallback_model: str = "openai/gpt-4o-mini"
     openrouter_monthly_budget_usd: float = 5.0
     openrouter_daily_budget_usd: float = 1.0

@@ -21,10 +21,10 @@ OPENROUTER_BASE = "https://openrouter.ai/api/v1"
 
 # Approximate cost per 1M tokens (update as pricing changes)
 MODEL_COSTS = {
-    "qwen/qwen2-vl-72b-instruct": {"input": 0.40, "output": 0.40},
+    "qwen/qwen2.5-vl-72b-instruct": {"input": 0.15, "output": 0.15},
     "openai/gpt-4o-mini": {"input": 0.15, "output": 0.60},
     "openai/gpt-4o": {"input": 2.50, "output": 10.00},
-    "qwen/qwen2-vl-7b-instruct": {"input": 0.10, "output": 0.10},
+    "qwen/qwen2.5-vl-32b-instruct": {"input": 0.50, "output": 0.50},
 }
 
 
