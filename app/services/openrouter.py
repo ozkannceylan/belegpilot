@@ -39,7 +39,7 @@ AVAILABLE_MODELS = [
     {"id": "openai/gpt-4o", "name": "GPT-4o", "tier": "premium"},
     {"id": "openai/gpt-4o-mini", "name": "GPT-4o Mini", "tier": "standard"},
     {"id": "qwen/qwen3-vl-8b-instruct", "name": "Qwen3-VL 8B", "tier": "standard"},
-    {"id": "meta-llama/llama-3.2-11b-vision-instruct", "name": "Llama 3.2 11B Vision", "tier": "standard"},
+    {"id": "meta-llama/llama-3.2-11b-vision-instruct", "name": "Llama 3.2 11B", "tier": "standard"},
     {"id": "google/gemma-3-27b-it:free", "name": "Gemma 3 27B (Free)", "tier": "free"},
 ]
 
