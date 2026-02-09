@@ -271,7 +271,6 @@
             production: 'https://api.ozvatanyapi.com',
             local: 'http://localhost:8000'
         };
-        const DEFAULT_PROD_KEY = 'riq_live_9d461b9abb824a06991f17e669c07a38';
         
         let currentServer = localStorage.getItem('BelegPilot_server') || 'production';
         let API_BASE = SERVERS[currentServer];
@@ -303,13 +302,8 @@
             localBtn.classList.toggle('active', server === 'local');
             serverUrl.textContent = SERVERS[server];
             
-            // Load appropriate API key
-            const savedKey = localStorage.getItem(`BelegPilot_api_key_${server}`);
-            if (server === 'production' && !savedKey) {
-                apiKeyInput.value = DEFAULT_PROD_KEY;
-            } else {
-                apiKeyInput.value = savedKey || '';
-            }
+            // Load saved API key for this server
+            apiKeyInput.value = localStorage.getItem(`BelegPilot_api_key_${server}`) || '';
             updateSubmitState();
         }
         
