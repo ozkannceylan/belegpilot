@@ -34,9 +34,9 @@ htmlcov/
 
 # Uploads
 uploads/
-*.jpg
-*.jpeg
-*.png
+# *.jpg
+# *.jpeg
+# *.png
 !tests/fixtures/**
 
 # Documentation (keep README.md only)

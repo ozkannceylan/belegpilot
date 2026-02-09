@@ -195,6 +195,12 @@ class OpenRouterClient:
                 "max_tokens": 2000,
             },
         )
+        if response.status_code >= 400:
+            logger.error(
+                "OpenRouter API error",
+                status_code=response.status_code,
+                response_body=response.text[:500],
+            )
         response.raise_for_status()
         elapsed_ms = int((time.time() - start_time) * 1000)
 
