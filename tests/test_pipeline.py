@@ -56,8 +56,7 @@ async def test_pipeline_vlm_success(
         "output_tokens": 500,
         "cost_usd": 0.001,
         "elapsed_ms": 3000,
-        "raw_response": '{
-"vendor": "REWE"}',
+        "raw_response": '{"vendor": "REWE"}',
     }
 
     with (
