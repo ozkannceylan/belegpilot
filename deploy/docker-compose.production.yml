@@ -1,6 +1,7 @@
 services:
   app:
     image: ghcr.io/ozkannceylan/belegpilot:latest
+    container_name: belegpilot-app
     restart: always
     env_file: .env
     depends_on:
@@ -10,9 +11,11 @@ services:
         condition: service_started
     networks:
       - internal
+      - ozvatan-network
 
   db:
     image: postgres:16-alpine
+    container_name: belegpilot-db
     restart: always
     environment:
       POSTGRES_DB: belegpilot
@@ -30,6 +33,7 @@ services:
 
   phoenix:
     image: arizephoenix/phoenix:latest
+    container_name: belegpilot-phoenix
     restart: always
     environment:
       PHOENIX_WORKING_DIR: /phoenix
@@ -38,26 +42,11 @@ services:
     networks:
       - internal
 
-  caddy:
-    image: caddy:2-alpine
-    restart: always
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      - app
-    networks:
-      - internal
-
 volumes:
   pgdata:
   phoenix_data:
-  caddy_data:
-  caddy_config:
 
 networks:
   internal:
+  ozvatan-network:
+    external: true
