@@ -58,7 +58,7 @@ class OpenRouterClient:
             base_url=OPENROUTER_BASE,
             headers={
                 "Authorization": f"Bearer {self.api_key}",
-                "HTTP-Referer": "https://api.ozvatanyapi.com",
+                "HTTP-Referer": "https://api.ozkanceylan.dev",
                 "X-Title": "BelegPilot",
             },
             timeout=60.0,

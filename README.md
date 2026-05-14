@@ -10,8 +10,8 @@ Upload a receipt image → get structured JSON with vendor, date, total, line it
 
 ## Live Demo
 
-**API:** [api.ozvatanyapi.com](https://api.ozvatanyapi.com/docs)  
-**Demo UI:** [api.ozvatanyapi.com/demo](https://api.ozvatanyapi.com/demo)
+**API:** [api.ozkanceylan.dev](https://api.ozkanceylan.dev/docs)  
+**Demo UI:** [api.ozkanceylan.dev/demo](https://api.ozkanceylan.dev/demo)
 
 ## Quick Start
 
@@ -86,7 +86,7 @@ Interactive API documentation (Swagger UI).
 import httpx
 
 response = httpx.post(
-    "https://api.ozvatanyapi.com/api/v1/extract",
+    "https://api.ozkanceylan.dev/api/v1/extract",
     headers={"X-API-Key": "riq_live_<your-key>"},
     files={"file": open("receipt.jpg", "rb")},
 )
@@ -146,11 +146,18 @@ print(response.json())
 
                               Infrastructure
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│  Cloudflare (DNS/CDN/SSL) → Traefik (Reverse Proxy) → Docker Containers     │
+│  Cloudflare DNS  →  Caddy (ozkanceylan.dev edge, auto-TLS)  →  Docker      │
 │                                                                              │
-│  CI/CD: GitHub Actions → GHCR → Auto-deploy to Hetzner Cloud                │
+│  Public entry:  api.ozkanceylan.dev                                          │
+│  Reverse proxy: shared ozkanceylan.dev Caddy via `belegpilot-edge` network   │
+│  Containers:    belegpilot-app  +  belegpilot-db (Postgres 16)               │
+│                                                                              │
+│  CI/CD: GitHub Actions → GHCR → pull-and-restart on VPS                     │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
+
+See [`deploy/README.md`](deploy/README.md) for the full production deployment
+guide (host prep, env file, Caddy wiring, Cloudflare DNS records).
 
 ## Key Features
 
@@ -171,7 +178,7 @@ print(response.json())
 - **Non-root container** execution
 
 ### 📊 Full Observability
-- **Distributed tracing** via OpenTelemetry to Arize Phoenix
+- **Distributed tracing** instrumented via OpenTelemetry (optional Arize Phoenix backend; OTLP exporter fails silently when no collector is running)
 - **Prometheus metrics** at `/metrics` endpoint
 - **Structured JSON logging** with request correlation IDs
 - **LLM call tracing** with token counts and latency
@@ -232,10 +239,9 @@ print(response.json())
 | **Docker** | Multi-stage containerization |
 | **Docker Compose** | Multi-service orchestration |
 | **PostgreSQL 16** | Primary datastore with health checks |
-| **Traefik v2** | Reverse proxy with automatic TLS |
-| **Caddy** | Alternative reverse proxy option |
+| **Caddy** | Edge reverse proxy with automatic Let's Encrypt TLS |
 | **Hetzner Cloud** | Production hosting |
-| **Cloudflare** | DNS, CDN & SSL termination |
+| **Cloudflare** | DNS (DNS-only, TLS terminated at Caddy) |
 
 ### CI/CD & Quality
 | Technology | Purpose |
@@ -299,6 +305,26 @@ docker compose -f docker/docker-compose.yml exec app python scripts/generate_api
 | `DB_HOST` | PostgreSQL host | `localhost` |
 | `DB_PASSWORD` | Database password | - |
 | `ENVIRONMENT` | `development` / `production` | `development` |
+
+## Production Deployment
+
+The production deployment uses a slim two-container stack (`belegpilot-app` +
+`belegpilot-db`) that lives behind ozkanceylan.dev's shared Caddy edge. Phoenix
+is **not** deployed in production — the OTLP exporter is wired in code but
+fails silently when no collector is reachable, so observability stays optional.
+
+```bash
+# On the VPS (one-shot, as root)
+sudo bash deploy/scripts/setup_server.sh          # docker + /data dirs + edge net
+
+# As deploy user
+bash deploy/scripts/create_env.sh                  # generates deploy/.env
+$EDITOR deploy/.env                                # set OPENROUTER_API_KEY
+cd deploy && docker compose -f docker-compose.production.yml up -d
+```
+
+See [`deploy/README.md`](deploy/README.md) for the architecture rationale,
+Caddy wiring, Cloudflare DNS instructions, and ops runbooks.
 
 ## License
 
