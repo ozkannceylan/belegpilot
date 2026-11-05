@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     # App
     environment: str = "development"
     log_level: str = "INFO"
+    # Sec-fix 2026-11-05: disable OpenAPI UI / metrics in production via env
+    enable_docs: bool = False
+    enable_metrics: bool = False
     secret_key: str = "change-me-in-production"
     allowed_origins: str = "*"
     api_key_admin_secret: str = "change-me-admin"

@@ -49,13 +49,18 @@ async def lifespan(app: FastAPI):
     logger.info("Shutting down BelegPilot")
 
 
+_docs = "/docs" if settings.enable_docs else None
+_redoc = "/redoc" if settings.enable_docs else None
+_openapi = "/openapi.json" if settings.enable_docs else None
+
 app = FastAPI(
     title="BelegPilot",
     description="Intelligent receipt & invoice data extraction API",
     version="0.1.0",
     lifespan=lifespan,
-    docs_url="/docs",
-    redoc_url="/redoc",
+    docs_url=_docs,
+    redoc_url=_redoc,
+    openapi_url=_openapi,
 )
 
 # Request ID middleware
@@ -74,7 +79,8 @@ app.add_middleware(
 app.include_router(health.router, tags=["Health"])
 app.include_router(extract.router, prefix="/api/v1", tags=["Extraction"])
 app.include_router(results.router, prefix="/api/v1", tags=["Results"])
-app.include_router(metrics_router, tags=["Metrics"])
+if settings.enable_metrics:
+    app.include_router(metrics_router, tags=["Metrics"])
 
 # Static files for demo UI
 static_dir = Path(__file__).parent / "static"
